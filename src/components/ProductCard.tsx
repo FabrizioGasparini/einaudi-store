@@ -38,9 +38,9 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       onClick={onClick}
       className="group bg-white rounded-3xl border border-gray-100 overflow-hidden flex flex-col cursor-pointer hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 hover:-translate-y-2 relative"
     >
-      <div className="relative h-72 bg-gray-50 flex items-center justify-center overflow-hidden">
+      <div className="relative h-96 bg-gray-50 flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (
-          <img 
+          <img  
             src={product.imageUrl} 
             alt={product.name} 
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 

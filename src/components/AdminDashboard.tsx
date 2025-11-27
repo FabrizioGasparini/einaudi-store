@@ -67,6 +67,8 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
   const [filterStudent, setFilterStudent] = useState<string>(""); // Search by student or Order ID
   const [filterStatus, setFilterStatus] = useState<string>("ALL"); // ALL, PAID, UNPAID
   const [filterDelivered, setFilterDelivered] = useState<string>("ALL"); // ALL, ARRIVED, NOT_ARRIVED
+  const [filterProduct, setFilterProduct] = useState<string>("");
+  const [filterStock, setFilterStock] = useState<string>("ALL"); // ALL, AVAILABLE, OUT_OF_STOCK
   const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" }>({ show: false, message: "", type: "success" });
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; orderId: string | null }>({ show: false, orderId: null });
 
@@ -459,14 +461,54 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
       </div>
       
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Inventario</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h2 className="text-2xl font-bold text-gray-900">Inventario</h2>
+            <div className="flex gap-4 w-full md:w-auto">
+                <select
+                value={filterStock}
+                onChange={(e) => setFilterStock(e.target.value)}
+                className="border text-black border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all flex-1 md:w-auto"
+                >
+                <option value="ALL">Tutti gli Stati</option>
+                <option value="AVAILABLE">Disponibile</option>
+                <option value="OUT_OF_STOCK">Esaurito</option>
+                </select>
+                <select
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+                className="border text-black border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all flex-1 md:w-auto"
+                >
+                <option value="">Tutti i Prodotti</option>
+                {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                    {p.name}
+                    </option>
+                ))}
+                </select>
+            </div>
+          </div>
           <div className="flex flex-col gap-8">
-            {products.map((product) => (
+            {products
+              .filter((p) => !filterProduct || p.id === filterProduct)
+              .map((product) => {
+                const filteredColors = product.colors.map(color => ({
+                    ...color,
+                    variants: color.variants.filter(v => {
+                        if (filterStock === "ALL") return true;
+                        if (filterStock === "AVAILABLE") return v.stock > 0;
+                        if (filterStock === "OUT_OF_STOCK") return v.stock === 0;
+                        return true;
+                    })
+                })).filter(c => c.variants.length > 0);
+
+                if (filteredColors.length === 0) return null;
+
+                return (
               <div key={product.id} className="border border-gray-200 rounded-xl overflow-hidden">
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                   <h3 className="font-bold text-lg text-gray-900">{product.name}</h3>
                   <span className="text-sm text-gray-500">
-                    {product.colors.reduce((acc, c) => acc + c.variants.length, 0)} varianti
+                    {filteredColors.reduce((acc, c) => acc + c.variants.length, 0)} varianti
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -480,7 +522,7 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {product.colors.map((color) => (
+                      {filteredColors.map((color) => (
                         color.variants.map((variant) => {
                           const sold = orders.reduce((acc, order) => {
                             if (order.status !== "PAID") return acc;
@@ -520,7 +562,8 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
                   </table>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
       </div>
 

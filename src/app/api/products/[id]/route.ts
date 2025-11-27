@@ -29,7 +29,24 @@ export async function PUT(
       },
     });
 
+    // Handle Colors and Variants
     if (data.colors && Array.isArray(data.colors)) {
+        // 1. Get all existing colors for this product
+        const existingColors = await prisma.productColor.findMany({
+            where: { productId: id },
+            include: { variants: true }
+        });
+
+        // 2. Identify colors to delete (present in DB but not in incoming data)
+        const incomingColorIds = data.colors.map((c: any) => c.id).filter((id: any) => id);
+        // @ts-ignore
+        const colorsToDelete = existingColors.filter(c => !incomingColorIds.includes(c.id));
+
+        for (const colorToDelete of colorsToDelete) {
+            await prisma.productColor.delete({ where: { id: colorToDelete.id } });
+        }
+
+        // 3. Process incoming colors
         for (const c of data.colors) {
             let colorId = c.id;
 
@@ -51,7 +68,25 @@ export async function PUT(
                 colorId = newColor.id;
             }
 
+            // Handle Variants for this color
             if (c.variants && Array.isArray(c.variants)) {
+                // Get existing variants for this color (if it existed)
+                // @ts-ignore
+                const existingVariants = colorId && incomingColorIds.includes(colorId) 
+                    // @ts-ignore
+                    ? existingColors.find(ec => ec.id === colorId)?.variants || [] 
+                    : [];
+
+                // Identify variants to delete
+                const incomingVariantIds = c.variants.map((v: any) => v.id).filter((id: any) => id);
+                // @ts-ignore
+                const variantsToDelete = existingVariants.filter(v => !incomingVariantIds.includes(v.id));
+
+                for (const variantToDelete of variantsToDelete) {
+                    await prisma.productVariant.delete({ where: { id: variantToDelete.id } });
+                }
+
+                // Process incoming variants
                 for (const v of c.variants) {
                     if (v.id) {
                         await prisma.productVariant.update({
