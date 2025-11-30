@@ -19,6 +19,7 @@ export async function POST(req: Request) {
         description: data.description,
         price: parseFloat(data.price),
         imageUrl: data.imageUrl,
+        backImageUrl: data.backImageUrl,
         active: data.active ?? true,
         colors: {
           create: data.colors.map((c: any) => ({

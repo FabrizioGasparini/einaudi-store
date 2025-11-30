@@ -106,10 +106,10 @@ function OrderCard({ order }: { order: any }) {
             Effettuato il {new Date(order.createdAt).toLocaleDateString("it-IT", { day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
             <div className={`flex items-center gap-2 px-4 py-2 rounded-full w-fit ${isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
                 {isPaid ? <CheckCircle size={16} /> : <Clock size={16} />}
-                <span className="text-sm font-bold">{isPaid ? "Pagato" : "In Attesa di Pagamento"}</span>
+                <span className="text-sm font-bold">{isPaid ? "Pagato" : "In Attesa"}</span>
             </div>
             <div className={`flex items-center gap-2 px-4 py-2 rounded-full w-fit ${isDelivered ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"}`}>
                 <Truck size={16} />
@@ -121,21 +121,21 @@ function OrderCard({ order }: { order: any }) {
       <div className="space-y-4">
         {order.items.map((item: any) => (
           <div key={item.id} className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
+            <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100 shrink-0">
                 {item.productVariant.productColor.product.imageUrl ? (
                     <img src={item.productVariant.productColor.product.imageUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
                     <Package size={24} className="text-gray-300" />
                 )}
             </div>
-            <div className="grow">
-              <h3 className="font-bold text-gray-900">{item.productVariant.productColor.product.name}</h3>
+            <div className="grow min-w-0">
+              <h3 className="font-bold text-gray-900 truncate">{item.productVariant.productColor.product.name}</h3>
               <p className="text-sm text-gray-500 flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: item.productVariant.productColor.color }}></span>
-                {item.productVariant.productColor.name || item.productVariant.productColor.color} / {item.productVariant.size}
+                <span className="w-3 h-3 rounded-full border border-gray-200 inline-block shrink-0" style={{ backgroundColor: item.productVariant.productColor.color }}></span>
+                <span className="truncate">{item.productVariant.productColor.name || item.productVariant.productColor.color} / {item.productVariant.size}</span>
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-right shrink-0">
                 <div className="font-medium text-gray-900">€ {item.price.toFixed(2)}</div>
                 <div className="text-xs text-gray-400">x{item.quantity}</div>
             </div>

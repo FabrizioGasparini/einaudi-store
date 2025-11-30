@@ -25,6 +25,7 @@ export async function PUT(
         description: data.description,
         price: parseFloat(data.price),
         imageUrl: data.imageUrl,
+        backImageUrl: data.backImageUrl,
         active: data.active,
       },
     });

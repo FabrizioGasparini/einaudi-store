@@ -23,6 +23,7 @@ type Product = {
   description: string | null;
   price: number;
   imageUrl: string | null;
+  backImageUrl: string | null;
   active: boolean;
   colors: ProductColor[];
 };
@@ -45,6 +46,7 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Saving product:", editingProduct);
     if (!editingProduct) return;
 
     const isNew = !editingProduct.id;
@@ -216,6 +218,17 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">URL Immagine Retro (Opzionale)</label>
+            <input
+              type="text"
+              value={editingProduct.backImageUrl || ""}
+              onChange={(e) => setEditingProduct({ ...editingProduct, backImageUrl: e.target.value })}
+              className="w-full text-black px-4 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white/50"
+              placeholder="https://..."
+            />
+          </div>
+
           <div className="flex items-center gap-3 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
             <input
               type="checkbox"
@@ -372,6 +385,7 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
               description: "",
               price: 0,
               imageUrl: "",
+              backImageUrl: "",
               active: true,
               colors: [],
             });

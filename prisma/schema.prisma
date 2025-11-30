@@ -28,6 +28,7 @@ model Product {
   description String?
   price       Float
   imageUrl    String?
+  backImageUrl String?
   active      Boolean          @default(true)
   colors      ProductColor[]
   createdAt   DateTime         @default(now())

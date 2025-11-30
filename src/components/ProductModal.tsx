@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ShoppingCart, Check, LogIn } from "lucide-react";
+import { X, ShoppingCart, Check, LogIn, RotateCw } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,7 @@ type Product = {
   description: string | null;
   price: number;
   imageUrl: string | null;
+  backImageUrl: string | null;
   colors: ProductColor[];
 };
 
@@ -51,12 +52,15 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     setAlertModalOpen(true);
   };
 
+  const [showBack, setShowBack] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       setIsClosing(false);
       setShowLoginPrompt(false);
       setSelectedColor("");
       setSelectedSize("");
+      setShowBack(false);
     }
   }, [isOpen, product]);
 
@@ -115,7 +119,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       />
       
       <div 
-        className={`relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 transform ${isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"}`}
+        className={`relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row transition-all duration-300 transform max-h-[90vh] overflow-y-auto md:overflow-hidden ${isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"}`}
       >
         <button 
           onClick={handleClose}
@@ -125,13 +129,30 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </button>
 
         {/* Image Section */}
-        <div className="w-full md:w-1/2 bg-gray-50 relative min-h-[300px] md:min-h-[500px]">
+        <div 
+            className="w-full md:w-1/2 bg-gray-50 relative min-h-[300px] md:min-h-[500px] group shrink-0 cursor-pointer"
+            onClick={() => product.backImageUrl && setShowBack(!showBack)}
+        >
           {product.imageUrl ? (
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+            <>
+              <img 
+                src={product.imageUrl} 
+                alt={product.name} 
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${product.backImageUrl ? (showBack ? "opacity-0" : "group-hover:opacity-0") : ""}`}
+              />
+              {product.backImageUrl && (
+                <>
+                    <img 
+                    src={product.backImageUrl} 
+                    alt={`${product.name} - Retro`} 
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${showBack ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                    />
+                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm md:hidden">
+                        <RotateCw size={20} className="text-gray-600" />
+                    </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-300">
               <span className="text-4xl font-light">Einaudi Store</span>
@@ -140,7 +161,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </div>
 
         {/* Details Section */}
-        <div className="w-full md:w-1/2 p-8 flex flex-col relative">
+        <div className="w-full md:w-1/2 p-8 flex flex-col relative animate-slide-in-right">
           {showLoginPrompt && (
             <div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm flex items-center justify-center p-6 rounded-r-3xl animate-in fade-in duration-200">
                 <div className="text-center max-w-xs">
@@ -242,7 +263,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
             <button
               onClick={handleAddToCart}
               disabled={!selectedColor || !selectedSize || (selectedVariant?.stock || 0) <= 0}
-              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-black active:scale-[0.98] transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed shadow-xl shadow-gray-900/10 flex items-center justify-center gap-3"
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-black hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed shadow-xl shadow-gray-900/10 flex items-center justify-center gap-3"
             >
               <ShoppingCart size={20} />
               {selectedVariant && selectedVariant.stock <= 0 ? "Esaurito" : "Aggiungi al Carrello"}

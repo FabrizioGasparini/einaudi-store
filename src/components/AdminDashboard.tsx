@@ -347,7 +347,7 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr>
@@ -457,6 +457,109 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View for Orders */}
+        <div className="md:hidden divide-y divide-gray-100">
+            {filteredOrders.map((order) => (
+                <div key={order.id} className="p-4 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="font-semibold text-gray-900">{order.user.nome}</div>
+                            <div className="text-xs text-gray-500">{order.user.email}</div>
+                            <div className="text-xs text-gray-500 mt-1">Classe: {order.user.classe || "N/A"}</div>
+                        </div>
+                        <div className="text-xs font-mono text-gray-400">#{order.id.slice(-6).toUpperCase()}</div>
+                    </div>
+
+                    <div className="space-y-2">
+                        {order.items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-900">{item.quantity}x</span>
+                                    <span className="text-gray-700">{item.productVariant.productColor.product.name}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <div className="w-2 h-2 rounded-full border border-gray-300" style={{ backgroundColor: item.productVariant.productColor.color }} />
+                                    {item.productVariant.size}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                        <span className="text-sm text-gray-500">Totale</span>
+                        <span className="font-bold text-gray-900">€ {order.total.toFixed(2)}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                order.status === "PAID"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                        >
+                            {order.status === "PAID" ? "PAGATO" : "DA PAGARE"}
+                        </span>
+                        <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                order.delivered
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-orange-100 text-orange-800"
+                            }`}
+                        >
+                            {order.delivered ? "CONSEGNATO" : "NON CONSEGNATO"}
+                        </span>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                        {order.status !== "PAID" ? (
+                        <button
+                          onClick={() => handleStatusChange(order.id, "PAID")}
+                          className="flex-1 p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors flex justify-center"
+                          title="Segna come Pagato"
+                        >
+                          <Check size={18} />
+                        </button>
+                      ) : (
+                         <button
+                          onClick={() => handleStatusChange(order.id, "PENDING")}
+                          className="flex-1 p-2 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition-colors flex justify-center"
+                          title="Segna come Da Pagare"
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
+
+                      {!order.delivered ? (
+                        <button
+                          onClick={() => handleDeliveredChange(order.id, true)}
+                          className="flex-1 p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors flex justify-center"
+                          title="Segna come Consegnato"
+                        >
+                          <Download size={18} className="rotate-180" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleDeliveredChange(order.id, false)}
+                          className="flex-1 p-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors flex justify-center"
+                          title="Segna come Non Consegnato"
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => setDeleteModal({ show: true, orderId: order.id })}
+                        className="flex-1 p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex justify-center"
+                        title="Elimina Ordine"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                </div>
+            ))}
         </div>
       </div>
       

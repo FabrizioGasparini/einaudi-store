@@ -67,9 +67,10 @@ export default function CartPage() {
       });
 
       if (response.ok) {
+        const order = await response.json();
         showToast("Ordine effettuato con successo!");
         clearCart();
-        router.push("/");
+        router.push(`/order-confirmation/${order.id}`);
       } else {
         const data = await response.json();
         showAlert(data.error || "Impossibile effettuare l'ordine.");
@@ -103,7 +104,8 @@ export default function CartPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Il tuo Carrello</h1>
       
       <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
             <thead className="bg-gray-50/80 border-b border-gray-100 backdrop-blur-sm">
                 <tr>
@@ -177,6 +179,69 @@ export default function CartPage() {
                 </tr>
             </tfoot>
             </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-gray-100">
+            {items.map((item) => (
+                <div key={item.variantId} className="p-4 space-y-3">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="font-medium text-gray-900">{item.name}</h3>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                                <div className="w-3 h-3 rounded-full border border-gray-300 shadow-sm" style={{ backgroundColor: item.color }} />
+                                <span>{item.colorName || item.color}</span>
+                                <span>•</span>
+                                <span>{item.size}</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => removeFromCart(item.variantId)}
+                            className="text-gray-400 hover:text-red-600 p-1"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                        <div className="text-gray-600">€ {item.price.toFixed(2)}</div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                                className="w-8 h-8 text-black rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                                disabled={item.quantity <= 1}
+                            >
+                                <Minus size={14} />
+                            </button>
+                            <span className="font-medium w-4 text-center text-black">{item.quantity}</span>
+                            <button
+                                onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                                className="w-8 h-8 text-black rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                                disabled={stockMap[item.variantId] !== undefined && item.quantity >= stockMap[item.variantId]}
+                            >
+                                <Plus size={14} />
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                        <span className="text-sm text-gray-500">Totale</span>
+                        <span className="font-bold text-gray-900">€ {(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                    
+                    {stockMap[item.variantId] !== undefined && item.quantity > stockMap[item.variantId] && (
+                        <div className="text-red-500 text-xs font-medium">
+                            Disponibili solo {stockMap[item.variantId]}
+                        </div>
+                    )}
+                </div>
+            ))}
+            <div className="p-4 bg-gray-50 border-t border-gray-100">
+                <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-900">Totale Ordine</span>
+                    <span className="text-xl font-bold text-gray-900">€ {total.toFixed(2)}</span>
+                </div>
+            </div>
         </div>
       </div>
 

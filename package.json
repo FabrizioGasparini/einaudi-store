@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "googleapis": "^166.0.0",
     "lucide-react": "^0.555.0",

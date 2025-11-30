@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Einaudi Store
 
-## Getting Started
+Una piattaforma e-commerce moderna e completa sviluppata per la gestione dello store Einaudi. Il progetto include un catalogo prodotti dinamico, gestione del carrello, autenticazione utenti e una dashboard amministrativa avanzata.
 
-First, run the development server:
+## 🚀 Tech Stack
 
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Linguaggio:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Database:** [SQLite](https://www.sqlite.org/) (via [Prisma ORM](https://www.prisma.io/))
+- **Autenticazione:** [NextAuth.js](https://next-auth.js.org/)
+- **Icone:** [Lucide React](https://lucide.dev/)
+
+## ✨ Funzionalità Principali
+
+### 🛍️ Storefront (Lato Utente)
+- **Catalogo Prodotti:** Visualizzazione a griglia dei prodotti con immagini e prezzi.
+- **Dettagli Prodotto:** Pagina di dettaglio con selezione di varianti (taglie) e colori.
+- **Carrello:** Gestione completa del carrello (aggiunta, rimozione, modifica quantità).
+- **Checkout:** Flusso di ordine semplificato.
+
+### 👨‍💼 Dashboard Amministratore
+- **Gestione Inventario:**
+  - Aggiunta, modifica ed eliminazione prodotti.
+  - Gestione avanzata di varianti e colori per ogni prodotto.
+  - Filtri per ricerca rapida (per nome prodotto e stato stock).
+- **Gestione Ordini:** Visualizzazione e cambio stato degli ordini.
+- **Statistiche:** Panoramica delle vendite e prodotti più popolari.
+- **Download:** Area per scaricare report (es. Excel).
+
+## 🛠️ Installazione e Configurazione
+
+### Prerequisiti
+- Node.js (v18 o superiore)
+- npm o yarn
+
+### 1. Clona il repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/FabrizioGasparini/einaudi-store.git
+cd store-einaudi
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Installa le dipendenze
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configura le Variabili d'Ambiente
+Crea un file `.env` nella root del progetto e aggiungi le seguenti variabili:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Database
+DATABASE_URL="file:./dev.db"
 
-## Learn More
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="tua-chiave-segreta-super-sicura"
 
-To learn more about Next.js, take a look at the following resources:
+# Google Auth (Opzionale per login Google)
+GOOGLE_CLIENT_ID="il-tuo-client-id"
+GOOGLE_CLIENT_SECRET="il-tuo-client-secret"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Setup del Database
+Inizializza il database SQLite e genera il client Prisma:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-## Deploy on Vercel
+### 5. Avvia il Server di Sviluppo
+```bash
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Apri [http://localhost:3000](http://localhost:3000) nel tuo browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📂 Struttura del Progetto
+
+- `src/app`: Pagine e routing (App Router).
+- `src/components`: Componenti React riutilizzabili (UI, Admin, Store).
+- `src/lib`: Utility functions e configurazione Prisma.
+- `prisma`: Schema del database e migrazioni.
+- `public`: Assets statici (immagini, favicon).
+
+## 📝 Licenza
+
+Questo progetto è proprietario e riservato all'uso interno.

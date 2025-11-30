@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { User, LayoutDashboard, Package, ShoppingBag } from "lucide-react";
 import CartButton from "./CartButton";
 import LogoutButton from "./LogoutButton";
+import MobileMenu from "./MobileMenu";
 
 export default async function Navbar() {
   const session = await getServerSession(authOptions);
@@ -20,9 +21,10 @@ export default async function Navbar() {
           </span>
         </Link>
         
-        <div className="flex items-center gap-4 text-sm font-medium text-gray-600">
+        <div className="flex items-center gap-2 md:gap-4 text-sm font-medium text-gray-600">
           {session ? (
             <>              
+              {/* Desktop Menu */}
               {/* @ts-ignore */}
               {session.user?.admin && (
                 <Link href="/admin" className="hidden md:flex items-center gap-2 hover:text-blue-600 transition-colors px-3 py-2 hover:bg-blue-50 rounded-xl" title="Pannello Admin">
@@ -42,8 +44,8 @@ export default async function Navbar() {
 
               <div className="h-8 w-px bg-gray-200 mx-2 hidden md:block"></div>
 
-              <div className="flex items-center gap-3 pl-2">
-                <div className="hidden md:flex flex-col items-end leading-tight">
+              <div className="hidden md:flex items-center gap-3 pl-2">
+                <div className="flex flex-col items-end leading-tight">
                   <span className="text-gray-900 font-bold text-xs uppercase tracking-wide">{session.user?.name}</span>
                   {/* @ts-ignore */}
                   {(session.user as any).class && (
@@ -53,12 +55,25 @@ export default async function Navbar() {
                 
                 <LogoutButton />
               </div>
+
+              {/* Mobile Menu */}
+              <MobileMenu user={{
+                name: session.user?.name,
+                email: session.user?.email,
+                // @ts-ignore
+                class: (session.user as any).class,
+                // @ts-ignore
+                admin: (session.user as any).admin
+              }} />
             </>
           ) : (
-            <Link href="/login" className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-gray-900/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 font-bold">
-              <User size={16} />
-              <span>Accedi</span>
-            </Link>
+            <>
+              <Link href="/login" className="hidden md:flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-gray-900/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 font-bold">
+                <User size={16} />
+                <span>Accedi</span>
+              </Link>
+              <MobileMenu />
+            </>
           )}
         </div>
       </div>

@@ -21,22 +21,25 @@ type Product = {
   description: string | null;
   price: number;
   imageUrl: string | null;
+  backImageUrl: string | null;
   colors: ProductColor[];
 };
 
 interface ProductCardProps {
   product: Product;
   onClick: () => void;
+  index?: number;
 }
 
-export default function ProductCard({ product, onClick }: ProductCardProps) {
+export default function ProductCard({ product, onClick, index = 0 }: ProductCardProps) {
   const colors = product.colors.map((c) => c.color);
   const totalStock = product.colors.reduce((acc, c) => acc + c.variants.reduce((vAcc, v) => vAcc + v.stock, 0), 0);
 
   return (
     <div 
       onClick={onClick}
-      className="group bg-white rounded-3xl border border-gray-100 overflow-hidden flex flex-col cursor-pointer hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 hover:-translate-y-2 relative"
+      className="group bg-white rounded-3xl border border-gray-100 overflow-hidden flex flex-col cursor-pointer hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 hover:-translate-y-2 active:scale-[0.98] relative animate-fade-in-up"
+      style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="relative h-96 bg-gray-50 flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (

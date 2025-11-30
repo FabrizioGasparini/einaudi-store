@@ -22,6 +22,7 @@ type Product = {
   description: string | null;
   price: number;
   imageUrl: string | null;
+  backImageUrl: string | null;
   colors: ProductColor[];
 };
 
@@ -32,11 +33,12 @@ export default function ProductGrid({ products }: { products: Product[] }) {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {products.length > 0 ? (
-          products.map((product) => (
+          products.map((product, index) => (
             <ProductCard 
               key={product.id} 
               product={product} 
               onClick={() => setSelectedProduct(product)}
+              index={index}
             />
           ))
         ) : (
