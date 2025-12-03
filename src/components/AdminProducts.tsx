@@ -25,6 +25,9 @@ type Product = {
   imageUrl: string | null;
   backImageUrl: string | null;
   active: boolean;
+  hasVariants: boolean;
+  category?: string | null;
+  isVariablePrice: boolean;
   colors: ProductColor[];
 };
 
@@ -49,15 +52,45 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
     console.log("Saving product:", editingProduct);
     if (!editingProduct) return;
 
-    const isNew = !editingProduct.id;
-    const url = isNew ? "/api/products" : `/api/products/${editingProduct.id}`;
+    // Prepare data for saving
+    let productToSave = { ...editingProduct };
+
+    if (!productToSave.hasVariants) {
+        // Ensure we have a default structure for single products
+        // If colors is empty or doesn't have the default structure, create it
+        // We assume the stock is stored in the first variant of the first color if it exists
+        // Or we might have stored it in a temporary way, but let's rely on the form updating the state correctly.
+        
+        // If the user switched to "Single Product", we ensure there is exactly one color and one variant.
+        // The form logic below ensures that when hasVariants is false, we are editing colors[0].variants[0].stock
+        
+        if (productToSave.colors.length === 0) {
+             productToSave.colors = [{ 
+                 color: "#FFFFFF", 
+                 name: "Unico", 
+                 variants: [{ size: "Unica", stock: 0 }] 
+             }];
+        } else {
+            // Ensure the structure is correct (1 color, 1 variant)
+            // We keep the stock from the first variant found
+            const currentStock = productToSave.colors[0]?.variants[0]?.stock || 0;
+            productToSave.colors = [{ 
+                 color: "#FFFFFF", 
+                 name: "Unico", 
+                 variants: [{ size: "Unica", stock: currentStock }] 
+             }];
+        }
+    }
+
+    const isNew = !productToSave.id;
+    const url = isNew ? "/api/products" : `/api/products/${productToSave.id}`;
     const method = isNew ? "POST" : "PUT";
 
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingProduct),
+        body: JSON.stringify(productToSave),
       });
 
       if (res.ok) {
@@ -229,122 +262,205 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
             />
           </div>
 
-          <div className="flex items-center gap-3 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Categoria</label>
             <input
-              type="checkbox"
-              checked={editingProduct.active}
-              onChange={(e) => setEditingProduct({ ...editingProduct, active: e.target.checked })}
-              id="active"
-              className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+              type="text"
+              value={editingProduct.category || ""}
+              onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+              className="w-full text-black px-4 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white/50"
+              placeholder="Es. Felpe, T-Shirt, Gadget..."
+              list="categories"
             />
-            <label htmlFor="active" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
-                Attivo (Visibile nel negozio)
-            </label>
+            <datalist id="categories">
+                <option value="Generale" />
+                <option value="Abbigliamento" />
+                <option value="Accessori" />
+                <option value="Cancelleria" />
+            </datalist>
+          </div>
+
+          <div className="flex flex-col gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+            <div className="flex items-center gap-3">
+                <input
+                type="checkbox"
+                checked={editingProduct.active}
+                onChange={(e) => setEditingProduct({ ...editingProduct, active: e.target.checked })}
+                id="active"
+                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="active" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                    Attivo (Visibile nel negozio)
+                </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <input
+                    type="checkbox"
+                    checked={editingProduct.isVariablePrice}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, isVariablePrice: e.target.checked })}
+                    id="isVariablePrice"
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="isVariablePrice" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                    Prezzo Variabile (Mostra range di prezzo +2€)
+                </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <input
+                    type="checkbox"
+                    checked={!editingProduct.hasVariants}
+                    onChange={(e) => {
+                        const isSingle = e.target.checked;
+                        let newColors = [...editingProduct.colors];
+                        if (isSingle) {
+                            // Switching to Single: Ensure we have at least one variant to hold stock
+                            if (newColors.length === 0) {
+                                newColors = [{ color: "#FFFFFF", name: "Unico", variants: [{ size: "Unica", stock: 0 }] }];
+                            }
+                        }
+                        setEditingProduct({ ...editingProduct, hasVariants: !isSingle, colors: newColors });
+                    }}
+                    id="singleProduct"
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="singleProduct" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                    Prodotto Singolo (Nessuna variante di taglia/colore)
+                </label>
+            </div>
           </div>
 
           <div className="border-t border-gray-100 pt-6">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <Layers size={18} /> Varianti (Colori)
-                </h3>
-                <button
-                type="button"
-                onClick={addColor}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                >
-                <Plus size={16} /> Aggiungi Colore
-                </button>
-            </div>
-            
-            <div className="space-y-6">
-                {editingProduct.colors.map((colorGroup, colorIndex) => (
-                <div key={colorIndex} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="color"
-                                value={colorGroup.color || "#000000"}
-                                onChange={(e) => updateColor(colorIndex, "color", e.target.value)}
-                                className="h-10 w-14 p-1 rounded-lg border border-gray-200 cursor-pointer"
-                            />
-                            <input
-                                type="text"
-                                value={colorGroup.color}
-                                onChange={(e) => updateColor(colorIndex, "color", e.target.value)}
-                                className="w-24 text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none uppercase"
-                                placeholder="#000000"
-                            />
-                            <input
-                                type="text"
-                                value={colorGroup.name || ""}
-                                onChange={(e) => updateColor(colorIndex, "name", e.target.value)}
-                                className="w-40 text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
-                                placeholder="Nome (es. Rosso)"
-                            />
-                        </div>
-                        <div className="grow"></div>
+            {editingProduct.hasVariants ? (
+                <>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            <Layers size={18} /> Varianti (Colori)
+                        </h3>
                         <button
-                            type="button"
-                            onClick={() => removeColor(colorIndex)}
-                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                        type="button"
+                        onClick={addColor}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                         >
-                            Rimuovi Colore
+                        <Plus size={16} /> Aggiungi Colore
                         </button>
                     </div>
-
-                    <div className="space-y-2 pl-4 border-l-2 border-gray-200">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-gray-500 uppercase">Taglie e Stock</span>
-                            <button
-                                type="button"
-                                onClick={() => addVariant(colorIndex)}
-                                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                            >
-                                <Plus size={12} /> Aggiungi Taglia
-                            </button>
-                        </div>
-                        
-                        {colorGroup.variants.map((variant, variantIndex) => (
-                            <div key={variantIndex} className="flex gap-3 items-center">
-                                <div className="w-24">
+                    
+                    <div className="space-y-6">
+                        {editingProduct.colors.map((colorGroup, colorIndex) => (
+                        <div key={colorIndex} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={colorGroup.color || "#000000"}
+                                        onChange={(e) => updateColor(colorIndex, "color", e.target.value)}
+                                        className="h-10 w-14 p-1 rounded-lg border border-gray-200 cursor-pointer"
+                                    />
                                     <input
                                         type="text"
-                                        value={variant.size}
-                                        onChange={(e) => updateVariant(colorIndex, variantIndex, "size", e.target.value)}
-                                        className="w-full text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
-                                        placeholder="Taglia"
+                                        value={colorGroup.color}
+                                        onChange={(e) => updateColor(colorIndex, "color", e.target.value)}
+                                        className="w-24 text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none uppercase"
+                                        placeholder="#000000"
                                     />
-                                </div>
-                                <div className="w-24">
                                     <input
-                                        type="number"
-                                        value={variant.stock}
-                                        onChange={(e) => updateVariant(colorIndex, variantIndex, "stock", parseInt(e.target.value))}
-                                        className="w-full text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
-                                        placeholder="Stock"
+                                        type="text"
+                                        value={colorGroup.name || ""}
+                                        onChange={(e) => updateColor(colorIndex, "name", e.target.value)}
+                                        className="w-40 text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
+                                        placeholder="Nome (es. Rosso)"
                                     />
                                 </div>
+                                <div className="grow"></div>
                                 <button
                                     type="button"
-                                    onClick={() => removeVariant(colorIndex, variantIndex)}
-                                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    onClick={() => removeColor(colorIndex)}
+                                    className="text-red-500 hover:text-red-700 text-sm font-medium"
                                 >
-                                    <Trash2 size={16} />
+                                    Rimuovi Colore
                                 </button>
                             </div>
+
+                            <div className="space-y-2 pl-4 border-l-2 border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-xs font-bold text-gray-500 uppercase">Taglie e Stock</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => addVariant(colorIndex)}
+                                        className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                                    >
+                                        <Plus size={12} /> Aggiungi Taglia
+                                    </button>
+                                </div>
+                                
+                                {colorGroup.variants.map((variant, variantIndex) => (
+                                    <div key={variantIndex} className="flex gap-3 items-center">
+                                        <div className="w-24">
+                                            <input
+                                                type="text"
+                                                value={variant.size}
+                                                onChange={(e) => updateVariant(colorIndex, variantIndex, "size", e.target.value)}
+                                                className="w-full text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
+                                                placeholder="Taglia"
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <input
+                                                type="number"
+                                                value={variant.stock}
+                                                onChange={(e) => updateVariant(colorIndex, variantIndex, "stock", parseInt(e.target.value))}
+                                                className="w-full text-black px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:border-blue-500 outline-none"
+                                                placeholder="Stock"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeVariant(colorIndex, variantIndex)}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                                {colorGroup.variants.length === 0 && (
+                                    <div className="text-xs text-gray-400 italic">Nessuna taglia aggiunta.</div>
+                                )}
+                            </div>
+                        </div>
                         ))}
-                        {colorGroup.variants.length === 0 && (
-                            <div className="text-xs text-gray-400 italic">Nessuna taglia aggiunta.</div>
+                        {editingProduct.colors.length === 0 && (
+                            <div className="text-center py-8 text-gray-400 bg-gray-50/30 rounded-xl border border-dashed border-gray-200">
+                            Nessun colore aggiunto. Clicca "Aggiungi Colore" per iniziare.
+                            </div>
                         )}
                     </div>
+                </>
+            ) : (
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Quantità Disponibile (Stock)</label>
+                    <input
+                        type="number"
+                        value={editingProduct.colors[0]?.variants[0]?.stock || 0}
+                        onChange={(e) => {
+                            const newStock = parseInt(e.target.value);
+                            const newColors = [...editingProduct.colors];
+                            if (newColors.length === 0) {
+                                newColors.push({ color: "#FFFFFF", name: "Unico", variants: [{ size: "Unica", stock: newStock }] });
+                            } else {
+                                if (newColors[0].variants.length === 0) {
+                                    newColors[0].variants.push({ size: "Unica", stock: newStock });
+                                } else {
+                                    newColors[0].variants[0].stock = newStock;
+                                }
+                            }
+                            setEditingProduct({ ...editingProduct, colors: newColors });
+                        }}
+                        className="w-full text-black px-4 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white/50"
+                    />
                 </div>
-                ))}
-                {editingProduct.colors.length === 0 && (
-                    <div className="text-center py-8 text-gray-400 bg-gray-50/30 rounded-xl border border-dashed border-gray-200">
-                      Nessun colore aggiunto. Clicca "Aggiungi Colore" per iniziare.
-                    </div>
-                )}
-            </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -387,6 +503,9 @@ export default function AdminProducts({ initialProducts }: { initialProducts: Pr
               imageUrl: "",
               backImageUrl: "",
               active: true,
+              hasVariants: true,
+              category: "Generale",
+              isVariablePrice: false,
               colors: [],
             });
             setIsCreating(true);

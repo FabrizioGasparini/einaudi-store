@@ -27,6 +27,9 @@ export async function PUT(
         imageUrl: data.imageUrl,
         backImageUrl: data.backImageUrl,
         active: data.active,
+        hasVariants: data.hasVariants,
+        category: data.category,
+        isVariablePrice: data.isVariablePrice,
       },
     });
 
@@ -44,6 +47,20 @@ export async function PUT(
         const colorsToDelete = existingColors.filter(c => !incomingColorIds.includes(c.id));
 
         for (const colorToDelete of colorsToDelete) {
+            const count = await prisma.orderItem.count({
+                where: {
+                    productVariant: {
+                        productColorId: colorToDelete.id
+                    }
+                }
+            });
+
+            if (count > 0) {
+                return NextResponse.json({ 
+                    error: `Impossibile eliminare il colore "${colorToDelete.color}" perché è presente in ${count} ordini.` 
+                }, { status: 400 });
+            }
+
             await prisma.productColor.delete({ where: { id: colorToDelete.id } });
         }
 
@@ -84,6 +101,16 @@ export async function PUT(
                 const variantsToDelete = existingVariants.filter(v => !incomingVariantIds.includes(v.id));
 
                 for (const variantToDelete of variantsToDelete) {
+                    const count = await prisma.orderItem.count({
+                        where: { productVariantId: variantToDelete.id }
+                    });
+
+                    if (count > 0) {
+                        return NextResponse.json({ 
+                            error: `Impossibile eliminare la variante "${variantToDelete.size}" (Colore: ${c.color}) perché è presente in ${count} ordini.` 
+                        }, { status: 400 });
+                    }
+
                     await prisma.productVariant.delete({ where: { id: variantToDelete.id } });
                 }
 

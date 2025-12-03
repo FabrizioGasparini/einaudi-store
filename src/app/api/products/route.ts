@@ -21,6 +21,9 @@ export async function POST(req: Request) {
         imageUrl: data.imageUrl,
         backImageUrl: data.backImageUrl,
         active: data.active ?? true,
+        hasVariants: data.hasVariants ?? true,
+        category: data.category ?? "Generale",
+        isVariablePrice: data.isVariablePrice ?? false,
         colors: {
           create: data.colors.map((c: any) => ({
             color: c.color,

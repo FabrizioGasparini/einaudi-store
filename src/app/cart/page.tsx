@@ -245,7 +245,10 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 flex flex-col items-end gap-3">
+        <p className="text-sm text-gray-500 text-right max-w-md">
+            Nota: Confermando l'ordine non verrà effettuato alcun pagamento online. Si tratta esclusivamente di una prenotazione.
+        </p>
         <button
           onClick={handleCheckout}
           className="bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 px-10 rounded-2xl text-lg font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95"

@@ -23,6 +23,9 @@ type Product = {
   price: number;
   imageUrl: string | null;
   backImageUrl: string | null;
+  hasVariants: boolean;
+  category?: string;
+  isVariablePrice?: boolean;
   colors: ProductColor[];
 };
 

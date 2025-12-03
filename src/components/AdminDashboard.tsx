@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import { Check, X, Download, AlertCircle, Trash2 } from "lucide-react";
+import { Check, X, Download, AlertCircle, Trash2, Printer } from "lucide-react";
 
 type ProductVariant = {
   id: string;
@@ -165,6 +165,75 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
       console.error("Error deleting order:", error);
       showToast("Errore durante l'eliminazione", "error");
     }
+  };
+
+  const handlePrintClass = (className: string) => {
+    const classOrders = orders.filter((o) => o.user.classe === className);
+    classOrders.sort((a, b) => (a.user.nome || "").localeCompare(b.user.nome || ""));
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        showToast("Impossibile aprire la finestra di stampa", "error");
+        return;
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Lista Ordini - Classe ${className}</title>
+          <style>
+            body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 40px; color: #111; }
+            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+            h1 { margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: -0.025em; }
+            .meta { color: #666; margin-top: 8px; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; font-size: 14px; }
+            th { text-align: left; border-bottom: 2px solid #000; padding: 12px 8px; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
+            td { border-bottom: 1px solid #eee; padding: 16px 8px; vertical-align: top; }
+            .student-name { font-weight: 600; font-size: 15px; }
+            .items-list { color: #444; line-height: 1.5; }
+            .price { font-family: monospace; font-size: 15px; font-weight: 600; }
+            .checkbox-cell { text-align: center; width: 100px; }
+            .checkbox { width: 24px; height: 24px; border: 2px solid #ddd; border-radius: 6px; display: inline-block; }
+            .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #999; }
+            @media print { @page { margin: 2cm; } body { padding: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Lista Ordini - Classe ${className}</h1>
+            <div class="meta">Generato il ${new Date().toLocaleDateString('it-IT')} • ${classOrders.length} Ordini</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Studente</th>
+                <th>Articoli Ordinati</th>
+                <th>Totale</th>
+                <th class="checkbox-cell">Pagato</th>
+                <th class="checkbox-cell">Consegnato</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${classOrders.map(order => `
+                <tr>
+                  <td><div class="student-name">${order.user.nome || order.user.email}</div></td>
+                  <td><div class="items-list">${order.items.map(i => `<div>${i.quantity}x ${i.productVariant.productColor.product.name} <span style="color:#666; font-size: 12px">(${i.productVariant.size})</span></div>`).join('')}</div></td>
+                  <td><div class="price">€ ${order.total.toFixed(2)}</div></td>
+                  <td class="checkbox-cell"><div class="checkbox"></div></td>
+                  <td class="checkbox-cell"><div class="checkbox"></div></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">Einaudi Store - Lista di Controllo Rappresentanti</div>
+          <script>window.onload = () => { setTimeout(() => { window.print(); }, 500); };</script>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   const downloadClassSpreadsheet = (className: string) => {
@@ -337,12 +406,20 @@ export default function AdminDashboard({ initialOrders, products }: { initialOrd
                 <Download size={16} /> Tutto
             </button>
             {filterClass && (
+              <>
+              <button
+                onClick={() => handlePrintClass(filterClass)}
+                className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition-colors shadow-lg shadow-gray-900/20"
+              >
+                <Printer size={16} /> Stampa
+              </button>
               <button
                 onClick={() => downloadClassSpreadsheet(filterClass)}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
               >
                 <Download size={16} /> {filterClass}
               </button>
+              </>
             )}
           </div>
         </div>

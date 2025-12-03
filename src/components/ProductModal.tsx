@@ -27,6 +27,9 @@ type Product = {
   price: number;
   imageUrl: string | null;
   backImageUrl: string | null;
+  hasVariants: boolean;
+  category?: string;
+  isVariablePrice?: boolean;
   colors: ProductColor[];
 };
 
@@ -55,12 +58,19 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const [showBack, setShowBack] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && product) {
       setIsClosing(false);
       setShowLoginPrompt(false);
-      setSelectedColor("");
-      setSelectedSize("");
       setShowBack(false);
+      
+      if (!product.hasVariants && product.colors.length > 0 && product.colors[0].variants.length > 0) {
+          // Auto-select for single products
+          setSelectedColor(product.colors[0].color);
+          setSelectedSize(product.colors[0].variants[0].size);
+      } else {
+          setSelectedColor("");
+          setSelectedSize("");
+      }
     }
   }, [isOpen, product]);
 
@@ -190,58 +200,69 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h2>
-            <p className="text-2xl font-semibold text-blue-600">€ {product.price.toFixed(2)}</p>
+            {product.isVariablePrice ? (
+              <>
+                <p className="text-2xl font-semibold text-blue-600">€ {product.price.toFixed(2)} - {(product.price + 2).toFixed(2)}</p>
+                <p className="text-xs text-gray-400 mt-1">NB: il prezzo è variabile al numero di pezzi che verranno venduti</p>
+              </>
+            ) : (
+              <p className="text-2xl font-semibold text-blue-600">€ {product.price.toFixed(2)}</p>
+            )}
           </div>
 
           <div className="prose prose-sm text-gray-500 mb-8">
-            <p>{product.description}</p>
+            {product.description}
           </div>
 
           <div className="space-y-6 mb-8">
-            {/* Colors */}
-            <div>
-              <span className="text-sm font-medium text-gray-900 block mb-3">
-                Colore {selectedColorGroup?.name ? <span className="text-gray-500 font-normal">- {selectedColorGroup.name}</span> : ""}
-              </span>
-              <div className="flex flex-wrap gap-3">
-                {product.colors.map((c) => (
-                  <button
-                    key={c.color}
-                    onClick={() => {
-                        setSelectedColor(c.color);
-                        setSelectedSize("");
-                    }}
-                    className={`w-10 h-10 rounded-full transition-all border-2 ${
-                      selectedColor === c.color
-                        ? "border-blue-600 scale-110 shadow-md"
-                        : "border-gray-200 hover:scale-105 hover:shadow-sm"
-                    }`}
-                    style={{ backgroundColor: c.color }}
-                    title={c.name || c.color}
-                  />
-                ))}
-              </div>
-            </div>
+            {product.hasVariants && (
+                <>
+                    {/* Colors */}
+                    <div>
+                    <span className="text-sm font-medium text-gray-900 block mb-3">
+                        Colore {selectedColorGroup?.name ? <span className="text-gray-500 font-normal">- {selectedColorGroup.name}</span> : ""}
+                    </span>
+                    <div className="flex flex-wrap gap-3">
+                        {product.colors.map((c) => (
+                        <button
+                            key={c.color}
+                            onClick={() => {
+                                setSelectedColor(c.color);
+                                setSelectedSize("");
+                            }}
+                            className={`w-10 h-10 rounded-full transition-all border-2 ${
+                            selectedColor === c.color
+                                ? "border-blue-600 scale-110 shadow-md"
+                                : "border-gray-200 hover:scale-105 hover:shadow-sm"
+                            }`}
+                            style={{ backgroundColor: c.color }}
+                            title={c.name || c.color}
+                        />
+                        ))}
+                    </div>
+                    </div>
 
-            {/* Sizes */}
-            <div>
-              <span className="text-sm font-medium text-gray-900 block mb-3">Taglia</span>
-              <div className="flex flex-wrap gap-3">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-medium transition-all border ${
-                      selectedSize === size
-                        ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    {/* Sizes */}
+                    <div>
+                    <span className="text-sm font-medium text-gray-900 block mb-3">Taglia</span>
+                    <div className="flex flex-wrap gap-3">
+                        {sizes.map((size) => (
+                        <button
+                            key={size}
+                            onClick={() => setSelectedSize(size)}
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-medium transition-all border ${
+                            selectedSize === size
+                                ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600"
+                                : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                        >
+                            {size}
+                        </button>
+                        ))}
+                    </div>
+                    </div>
+                </>
+            )}
           </div>
 
           <div className="mt-auto pt-6 border-t border-gray-100">
@@ -268,6 +289,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               <ShoppingCart size={20} />
               {selectedVariant && selectedVariant.stock <= 0 ? "Esaurito" : "Aggiungi al Carrello"}
             </button>
+            
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Nota: Questo è un ordine di prenotazione. Non verrà richiesto alcun pagamento immediato.
+            </p>
           </div>
         </div>
       </div>

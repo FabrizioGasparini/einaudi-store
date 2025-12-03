@@ -30,6 +30,9 @@ model Product {
   imageUrl    String?
   backImageUrl String?
   active      Boolean          @default(true)
+  hasVariants Boolean          @default(true)
+  category    String?          @default("Generale")
+  isVariablePrice Boolean      @default(false)
   colors      ProductColor[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt

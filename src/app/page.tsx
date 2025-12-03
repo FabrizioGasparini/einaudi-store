@@ -17,6 +17,19 @@ export default async function Home() {
     },
   });
 
+  // Group products by category
+  const productsByCategory = products.reduce((acc, product) => {
+    const category = product.category || "Generale";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {} as Record<string, typeof products>);
+
+  // Sort categories (optional, maybe "Generale" last or alphabetical)
+  const categories = Object.keys(productsByCategory).sort();
+
   return (
     <div className="flex flex-col gap-12 pb-12">
       <section className="relative min-h-[600px] flex items-center justify-center px-6 rounded-[2.5rem] bg-gray-900 text-white overflow-hidden shadow-2xl shadow-blue-900/20 group">
@@ -61,18 +74,29 @@ export default async function Home() {
         </div>
       </section>
 
-      <div id="products" className="max-w-7xl mx-auto w-full scroll-mt-24">
-        <div className="flex items-end justify-between mb-10 border-b border-gray-100 pb-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Nuovi Arrivi</h2>
-            <p className="text-gray-500 mt-1">Esplora le ultime novità del nostro catalogo</p>
+      <div id="products" className="max-w-7xl mx-auto w-full scroll-mt-24 space-y-16">
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <div key={category}>
+              <div className="flex items-end justify-between mb-10 border-b border-gray-100 pb-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{category}</h2>
+                  <p className="text-gray-500 mt-1">Esplora la collezione {category.toLowerCase()}</p>
+                </div>
+                <span className="text-sm font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-600">
+                  {productsByCategory[category].length} articoli
+                </span>
+              </div>
+              
+              <ProductGrid products={productsByCategory[category]} />
+            </div>
+          ))
+        ) : (
+           <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
+            <p className="text-lg">Nessun prodotto disponibile al momento.</p>
+            <p className="text-sm">Torna a controllare presto!</p>
           </div>
-          <span className="text-sm font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-600">
-            {products.length} articoli
-          </span>
-        </div>
-        
-        <ProductGrid products={products} />
+        )}
       </div>
     </div>
   );
