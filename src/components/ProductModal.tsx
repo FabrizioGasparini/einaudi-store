@@ -28,7 +28,7 @@ type Product = {
   imageUrl: string | null;
   backImageUrl: string | null;
   hasVariants: boolean;
-  category?: string;
+  category: string | null;
   isVariablePrice?: boolean;
   colors: ProductColor[];
 };
@@ -62,14 +62,14 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       setIsClosing(false);
       setShowLoginPrompt(false);
       setShowBack(false);
-      
+
       if (!product.hasVariants && product.colors.length > 0 && product.colors[0].variants.length > 0) {
-          // Auto-select for single products
-          setSelectedColor(product.colors[0].color);
-          setSelectedSize(product.colors[0].variants[0].size);
+        // Auto-select for single products
+        setSelectedColor(product.colors[0].color);
+        setSelectedSize(product.colors[0].variants[0].size);
       } else {
-          setSelectedColor("");
-          setSelectedSize("");
+        setSelectedColor("");
+        setSelectedSize("");
       }
     }
   }, [isOpen, product]);
@@ -91,8 +91,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     if (!selectedVariant) return;
 
     if (!session) {
-        setShowLoginPrompt(true);
-        return;
+      setShowLoginPrompt(true);
+      return;
     }
 
     const currentItem = items.find(i => i.variantId === selectedVariant.id);
@@ -123,15 +123,15 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <div 
+      <div
         className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${isClosing ? "opacity-0" : "opacity-100"}`}
         onClick={handleClose}
       />
-      
-      <div 
+
+      <div
         className={`relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row transition-all duration-300 transform max-h-[90vh] overflow-y-auto md:overflow-hidden ${isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"}`}
       >
-        <button 
+        <button
           onClick={handleClose}
           className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-md rounded-full hover:bg-white transition-colors shadow-sm"
         >
@@ -139,27 +139,27 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </button>
 
         {/* Image Section */}
-        <div 
-            className="w-full md:w-1/2 bg-gray-50 relative min-h-[300px] md:min-h-[500px] group shrink-0 cursor-pointer"
-            onClick={() => product.backImageUrl && setShowBack(!showBack)}
+        <div
+          className="w-full md:w-1/2 bg-gray-50 relative min-h-[300px] md:min-h-[500px] group shrink-0 cursor-pointer"
+          onClick={() => product.backImageUrl && setShowBack(!showBack)}
         >
           {product.imageUrl ? (
             <>
-              <img 
-                src={product.imageUrl} 
-                alt={product.name} 
+              <img
+                src={product.imageUrl}
+                alt={product.name}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${product.backImageUrl ? (showBack ? "opacity-0" : "group-hover:opacity-0") : ""}`}
               />
               {product.backImageUrl && (
                 <>
-                    <img 
-                    src={product.backImageUrl} 
-                    alt={`${product.name} - Retro`} 
+                  <img
+                    src={product.backImageUrl}
+                    alt={`${product.name} - Retro`}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${showBack ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                    />
-                    <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm md:hidden">
-                        <RotateCw size={20} className="text-gray-600" />
-                    </div>
+                  />
+                  <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-sm md:hidden">
+                    <RotateCw size={20} className="text-gray-600" />
+                  </div>
                 </>
               )}
             </>
@@ -171,30 +171,30 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         </div>
 
         {/* Details Section */}
-        <div className="w-full md:w-1/2 p-8 flex flex-col relative animate-slide-in-right">
+        <div className="w-full md:w-1/2 p-8 flex flex-col relative animate-slide-in-right overflow-y-auto">
           {showLoginPrompt && (
             <div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm flex items-center justify-center p-6 rounded-r-3xl animate-in fade-in duration-200">
-                <div className="text-center max-w-xs">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
-                        <LogIn size={32} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Accedi per acquistare</h3>
-                    <p className="text-gray-500 mb-6 text-sm">Devi effettuare l'accesso con la tua email scolastica per aggiungere articoli al carrello.</p>
-                    <div className="flex flex-col gap-3">
-                        <button 
-                            onClick={() => router.push("/login")}
-                            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-                        >
-                            Vai al Login
-                        </button>
-                        <button 
-                            onClick={() => setShowLoginPrompt(false)}
-                            className="w-full py-3 text-gray-500 font-medium hover:text-gray-700 transition-colors"
-                        >
-                            Annulla
-                        </button>
-                    </div>
+              <div className="text-center max-w-xs">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+                  <LogIn size={32} />
                 </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Accedi per acquistare</h3>
+                <p className="text-gray-500 mb-6 text-sm">Devi effettuare l'accesso con la tua email scolastica per aggiungere articoli al carrello.</p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                  >
+                    Vai al Login
+                  </button>
+                  <button
+                    onClick={() => setShowLoginPrompt(false)}
+                    className="w-full py-3 text-gray-500 font-medium hover:text-gray-700 transition-colors"
+                  >
+                    Annulla
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -216,69 +216,67 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
           <div className="space-y-6 mb-8">
             {product.hasVariants && (
-                <>
-                    {/* Colors */}
-                    <div>
-                    <span className="text-sm font-medium text-gray-900 block mb-3">
-                        Colore {selectedColorGroup?.name ? <span className="text-gray-500 font-normal">- {selectedColorGroup.name}</span> : ""}
-                    </span>
-                    <div className="flex flex-wrap gap-3">
-                        {product.colors.map((c) => (
-                        <button
-                            key={c.color}
-                            onClick={() => {
-                                setSelectedColor(c.color);
-                                setSelectedSize("");
-                            }}
-                            className={`w-10 h-10 rounded-full transition-all border-2 ${
-                            selectedColor === c.color
-                                ? "border-blue-600 scale-110 shadow-md"
-                                : "border-gray-200 hover:scale-105 hover:shadow-sm"
-                            }`}
-                            style={{ backgroundColor: c.color }}
-                            title={c.name || c.color}
-                        />
-                        ))}
-                    </div>
-                    </div>
+              <>
+                {/* Colors */}
+                <div>
+                  <span className="text-sm font-medium text-gray-900 block mb-3">
+                    Colore {selectedColorGroup?.name ? <span className="text-gray-500 font-normal">- {selectedColorGroup.name}</span> : ""}
+                  </span>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map((c) => (
+                      <button
+                        key={c.color}
+                        onClick={() => {
+                          setSelectedColor(c.color);
+                          setSelectedSize("");
+                        }}
+                        className={`w-10 h-10 rounded-full transition-all border-2 ${selectedColor === c.color
+                          ? "border-blue-600 scale-110 shadow-md"
+                          : "border-gray-400 hover:scale-105 hover:shadow-sm"
+                          }`}
+                        style={{ backgroundColor: c.color }}
+                        title={c.name || c.color}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-                    {/* Sizes */}
-                    <div>
-                    <span className="text-sm font-medium text-gray-900 block mb-3">Taglia</span>
-                    <div className="flex flex-wrap gap-3">
-                        {sizes.map((size) => (
-                        <button
-                            key={size}
-                            onClick={() => setSelectedSize(size)}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-medium transition-all border ${
-                            selectedSize === size
-                                ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600"
-                                : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                            }`}
-                        >
-                            {size}
-                        </button>
-                        ))}
-                    </div>
-                    </div>
-                </>
+                {/* Sizes */}
+                <div>
+                  <span className="text-sm font-medium text-gray-900 block mb-3">Taglia</span>
+                  <div className="flex flex-wrap gap-3">
+                    {sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-medium transition-all border ${selectedSize === size
+                          ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600"
+                          : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                          }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
           <div className="mt-auto pt-6 border-t border-gray-100">
             <div className="flex items-center justify-between mb-4">
-               {selectedVariant ? (
-                 selectedVariant.stock > 0 ? (
-                   <span className="flex items-center gap-2 text-green-600 text-sm font-medium">
-                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                     Disponibile ({selectedVariant.stock} rimasti)
-                   </span>
-                 ) : (
-                   <span className="text-red-500 text-sm font-medium">Esaurito</span>
-                 )
-               ) : (
-                 <span className="text-gray-400 text-sm">Seleziona le opzioni</span>
-               )}
+              {selectedVariant ? (
+                selectedVariant.stock > 0 ? (
+                  <span className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    Disponibile ({selectedVariant.stock} rimasti)
+                  </span>
+                ) : (
+                  <span className="text-red-500 text-sm font-medium">Esaurito</span>
+                )
+              ) : (
+                <span className="text-gray-400 text-sm">Seleziona le opzioni</span>
+              )}
             </div>
 
             <button
@@ -289,7 +287,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               <ShoppingCart size={20} />
               {selectedVariant && selectedVariant.stock <= 0 ? "Esaurito" : "Aggiungi al Carrello"}
             </button>
-            
+
             <p className="text-xs text-gray-500 text-center mt-3">
               Nota: Questo è un ordine di prenotazione. Non verrà richiesto alcun pagamento immediato.
             </p>
@@ -299,15 +297,15 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
       <Modal isOpen={alertModalOpen} onClose={() => setAlertModalOpen(false)} title="Attenzione">
         <div className="space-y-4">
-            <p className="text-gray-600">{alertMessage}</p>
-            <div className="flex justify-end">
-                <button 
-                    onClick={() => setAlertModalOpen(false)}
-                    className="px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors font-medium"
-                >
-                    OK
-                </button>
-            </div>
+          <p className="text-gray-600">{alertMessage}</p>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setAlertModalOpen(false)}
+              className="px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors font-medium"
+            >
+              OK
+            </button>
+          </div>
         </div>
       </Modal>
     </div>

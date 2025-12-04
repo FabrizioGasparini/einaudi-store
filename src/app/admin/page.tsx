@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/AdminDashboard";
 import AdminProducts from "@/components/AdminProducts";
+import { type Product } from "@/components/AdminProducts"
 
 export const dynamic = "force-dynamic";
 
@@ -52,23 +53,23 @@ export default async function AdminPage() {
 
   // @ts-ignore
   const serializedOrders = orders.map((order) => ({
-      ...order,
-      createdAt: order.createdAt.toISOString(),
-      updatedAt: order.updatedAt.toISOString(),
-      // @ts-ignore
-      items: order.items.map((item) => ({
-          ...item,
-          // Flatten structure for easier usage if needed, but keeping it nested is fine
-      }))
+    ...order,
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
+    // @ts-ignore
+    items: order.items.map((item) => ({
+      ...item,
+      // Flatten structure for easier usage if needed, but keeping it nested is fine
+    }))
   }));
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-12">
       <div>
-        <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-8 text-black">Admin Dashboard</h1>
         <AdminDashboard initialOrders={serializedOrders} products={products} />
       </div>
-      
+
       <div>
         <AdminProducts initialProducts={products} />
       </div>

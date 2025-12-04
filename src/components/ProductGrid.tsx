@@ -24,7 +24,7 @@ type Product = {
   imageUrl: string | null;
   backImageUrl: string | null;
   hasVariants: boolean;
-  category?: string;
+  category: string | null;
   isVariablePrice?: boolean;
   colors: ProductColor[];
 };
@@ -37,9 +37,9 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {products.length > 0 ? (
           products.map((product, index) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
+            <ProductCard
+              key={product.id}
+              product={product}
               onClick={() => setSelectedProduct(product)}
               index={index}
             />
@@ -52,10 +52,10 @@ export default function ProductGrid({ products }: { products: Product[] }) {
         )}
       </div>
 
-      <ProductModal 
-        product={selectedProduct} 
-        isOpen={!!selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
+      <ProductModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
       />
     </>
   );

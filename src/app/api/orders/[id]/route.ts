@@ -45,7 +45,7 @@ export async function PATCH(
             action,
             details,
             // @ts-ignore
-            userId: session.user.id,
+            userId: session.user.id ?? undefined,
         }
     });
 
@@ -103,7 +103,7 @@ export async function DELETE(
                 action: "ORDER_DELETED",
                 details: `Order ${id} deleted. Stock restored.`,
                 // @ts-ignore
-                userId: session.user.id,
+                userId: session.user.id ?? undefined,
             }
         });
     });

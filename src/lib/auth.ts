@@ -97,7 +97,7 @@ export const authOptions: NextAuthOptions = {
                 },
             });
 
-            const isAdminEmail = profile.email === "gasparini.fabrizio@einaudicorreggio.it";
+            const isAdminEmail = profile.email === "gasparini.fabrizio@einaudicorreggio.it" || profile.email === "busato.riccardo@einaudicorreggio.it";
             const role = isAdminEmail ? "ADMIN" : "STUDENTE";
 
             if (!dbUser) {
