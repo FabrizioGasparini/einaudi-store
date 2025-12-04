@@ -150,7 +150,7 @@ export default function CartPage() {
                     </div>
                     {stockMap[item.variantId] !== undefined && item.quantity > stockMap[item.variantId] && (
                         <div className="text-red-500 text-xs mt-1 font-medium">
-                            Disponibili solo {stockMap[item.variantId]}
+                            Quantità massima raggiunta
                         </div>
                     )}
                   </td>
@@ -231,7 +231,7 @@ export default function CartPage() {
                     
                     {stockMap[item.variantId] !== undefined && item.quantity > stockMap[item.variantId] && (
                         <div className="text-red-500 text-xs font-medium">
-                            Disponibili solo {stockMap[item.variantId]}
+                            Quantità massima raggiunta
                         </div>
                     )}
                 </div>

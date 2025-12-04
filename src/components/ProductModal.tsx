@@ -99,7 +99,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     const currentQty = currentItem ? currentItem.quantity : 0;
 
     if (currentQty + 1 > selectedVariant.stock) {
-      showAlert(`Non puoi aggiungere più di ${selectedVariant.stock} articoli di questo tipo.`);
+      showAlert(`Non puoi aggiungere altri articoli di questo tipo (limite raggiunto).`);
       return;
     }
 
@@ -202,7 +202,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
             <h2 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h2>
             {product.isVariablePrice ? (
               <>
-                <p className="text-2xl font-semibold text-blue-600">€ {product.price.toFixed(2)} - {(product.price + 2).toFixed(2)}</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl text-red-500 line-through font-bold">€ {(product.price + 3).toFixed(2)}</span>
+                  <p className="text-3xl font-bold text-blue-600">€ {product.price.toFixed(2)}</p>
+                </div>
                 <p className="text-xs text-gray-400 mt-1">NB: il prezzo è variabile al numero di pezzi che verranno venduti</p>
               </>
             ) : (
@@ -269,7 +272,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 selectedVariant.stock > 0 ? (
                   <span className="flex items-center gap-2 text-green-600 text-sm font-medium">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    Disponibile ({selectedVariant.stock} rimasti)
+                    Disponibile
                   </span>
                 ) : (
                   <span className="text-red-500 text-sm font-medium">Esaurito</span>

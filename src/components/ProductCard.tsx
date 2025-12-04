@@ -80,9 +80,20 @@ export default function ProductCard({ product, onClick, index = 0 }: ProductCard
         </div>
         
         <div className="mt-auto pt-4 flex items-center justify-between">
-            <span className="text-xl font-bold text-gray-900">
-              {product.isVariablePrice ? "Da " : ""}€ {product.price.toFixed(2)}
-            </span>
+            <div className="flex flex-col">
+              {product.isVariablePrice ? (
+                <>
+                  <span className="text-sm text-red-500 line-through font-bold">€ {(product.price + 3).toFixed(2)}</span>
+                  <span className="text-xl font-bold text-gray-900">
+                    € {product.price.toFixed(2)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xl font-bold text-gray-900">
+                  € {product.price.toFixed(2)}
+                </span>
+              )}
+            </div>
             
             <div className="flex -space-x-2">
                 {product.colors.slice(0, 3).map((c, i) => (
