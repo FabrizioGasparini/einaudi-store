@@ -1,6 +1,7 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Hourglass } from "lucide-react";
+import { useState, useEffect } from "react";
 
 type ProductVariant = {
   id: string;
@@ -35,6 +36,25 @@ interface ProductCardProps {
 export default function ProductCard({ product, onClick, index = 0 }: ProductCardProps) {
   const colors = product.colors.map((c) => c.color);
   const totalStock = product.colors.reduce((acc, c) => acc + c.variants.reduce((vAcc, v) => vAcc + v.stock, 0), 0);
+  const [isStoreOpen, setIsStoreOpen] = useState(false);
+
+  useEffect(() => {
+    const checkStoreStatus = () => {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(20, 0, 0, 0);
+      
+      if (now.getTime() >= target.getTime()) {
+        setIsStoreOpen(true);
+      } else {
+        setIsStoreOpen(false);
+      }
+    };
+    
+    checkStoreStatus();
+    const timer = setInterval(checkStoreStatus, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div 
@@ -66,7 +86,7 @@ export default function ProductCard({ product, onClick, index = 0 }: ProductCard
 
         <div className="absolute bottom-4 right-4 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
             <button className="bg-white text-black p-3 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-colors">
-                <ShoppingBag size={20} />
+                {isStoreOpen ? <ShoppingBag size={20} /> : <Hourglass size={20} className="animate-spin-slow" />}
             </button>
         </div>
       </div>

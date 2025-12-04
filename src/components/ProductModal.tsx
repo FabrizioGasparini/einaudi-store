@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ShoppingCart, Check, LogIn, RotateCw } from "lucide-react";
+import { X, ShoppingCart, Check, LogIn, RotateCw, Hourglass } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -56,6 +56,26 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   };
 
   const [showBack, setShowBack] = useState(false);
+  const [isStoreOpen, setIsStoreOpen] = useState(false);
+
+  useEffect(() => {
+    const checkStoreStatus = () => {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(20, 0, 0, 0);
+      
+      // If now is past 20:00, store is open
+      if (now.getTime() >= target.getTime()) {
+        setIsStoreOpen(true);
+      } else {
+        setIsStoreOpen(false);
+      }
+    };
+    
+    checkStoreStatus();
+    const timer = setInterval(checkStoreStatus, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (isOpen && product) {
@@ -284,11 +304,20 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
             <button
               onClick={handleAddToCart}
-              disabled={!selectedColor || !selectedSize || (selectedVariant?.stock || 0) <= 0}
+              disabled={!isStoreOpen || !selectedColor || !selectedSize || (selectedVariant?.stock || 0) <= 0}
               className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-black hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] transition-all disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed shadow-xl shadow-gray-900/10 flex items-center justify-center gap-3"
             >
-              <ShoppingCart size={20} />
-              {selectedVariant && selectedVariant.stock <= 0 ? "Esaurito" : "Aggiungi al Carrello"}
+              {!isStoreOpen ? (
+                <>
+                  <Hourglass size={20} className="animate-spin-slow" />
+                  In attesa del drop...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={20} />
+                  {selectedVariant && selectedVariant.stock <= 0 ? "Esaurito" : "Aggiungi al Carrello"}
+                </>
+              )}
             </button>
 
             <p className="text-xs text-gray-500 text-center mt-3">

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/AdminDashboard";
 import AdminProducts from "@/components/AdminProducts";
+import AdminLogs from "@/components/AdminLogs";
 import { type Product } from "@/components/AdminProducts"
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,16 @@ export default async function AdminPage() {
   if (!session || !session.user?.admin) {
     redirect("/");
   }
+
+  const logs = await prisma.auditLog.findMany({
+    include: {
+      user: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 200,
+  });
 
   const orders = await prisma.order.findMany({
     include: {
@@ -63,6 +74,11 @@ export default async function AdminPage() {
     }))
   }));
 
+  const serializedLogs = logs.map((log) => ({
+    ...log,
+    createdAt: log.createdAt.toISOString(),
+  }));
+
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-12">
       <div>
@@ -72,6 +88,10 @@ export default async function AdminPage() {
 
       <div>
         <AdminProducts initialProducts={products} />
+      </div>
+
+      <div>
+        <AdminLogs initialLogs={serializedLogs} />
       </div>
     </div>
   );
